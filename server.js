@@ -9,32 +9,44 @@ app.listen(port, () => {
 app.use(express.json())
 app.use(express.urlencoded({extended: false}));
 
-const database = [
-  { 
-    id: '123',
-    name: "Amy",
-    email: "amy@gmail.com",
-    password: "123",
-    entries: 0,
-    joined: new Date()
-  },
-  
-  { 
-    id: '123',
-    name: "Amy",
-    email: "amy@gmail.com",
-    password: "123",
-    entries: 0,
-    joined: new Date()
-  },
+const database = {
+  users: [
+    { 
+      id: '123',
+      name: 'John',
+      email: 'john@gmail.com',
+      password: 'john',
+      entries: 0,
+      joined: new Date()
+    },
 
-]
+    {
+      id: '124',
+      name: 'Mary',
+      email: 'mary@gmail.com',
+      password: 'mary',
+      entries: 0,
+      joined: new Date()
+    }
+  ]
+}
 
-
-app.get('/', (req, res) => {
-    res.json('Hello World!')
+app.get('/', (req,res) => {
+  res.json("App is running!");
 })
 
 app.post('/signin', (req, res) => {
-    res.json("signing")
+  const { email, password } = req.body;
+
+  let found = false;
+  database.users.forEach(user => {
+    if (user.email === email && user.password === password) {
+      found = true;
+      res.json("success");
+    }
+  })
+
+  if (!found) {
+    res.json("fail")
+  }
 })
