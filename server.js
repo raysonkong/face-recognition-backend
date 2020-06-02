@@ -27,26 +27,79 @@ const database = {
       password: 'mary',
       entries: 0,
       joined: new Date()
+    },
+
+    {
+      id: '125',
+      name: 'steve',
+      email: 'steve@gmail.com',
+      password: 'steve',
+      entries: 0,
+      joined: new Date()
+    },
+
+    {
+      id: '126',
+      name: 'joe',
+      email: 'joe@gmail.com',
+      password: 'joe',
+      entries: 0,
+      joined: new Date()
     }
   ]
 }
 
 app.get('/', (req,res) => {
-  res.json("App is running!");
+  res.json(database.users);
 })
 
 app.post('/signin', (req, res) => {
   const { email, password } = req.body;
 
   let found = false;
-  database.users.forEach(user => {
+  for (let user of database.users) {
     if (user.email === email && user.password === password) {
-      found = true;
       res.json("success");
+      found = true;
+      break;
     }
-  })
+  }  
 
   if (!found) {
     res.json("fail")
+  }
+})
+
+app.post('/register', (req,res) => {
+  const { name, email, password } = req.body;
+
+  const newUser = {
+    id: '125',
+    name: name,
+    email: email,
+    password: password,
+    entries: 0,
+    joined: new Date()
+  }
+
+  database.users.push(newUser);
+
+  res.json(database.users[database.users.length-1])
+})
+
+app.get('/profile/:id', (req, res) => {
+  const { id } = req.params;
+  let found = false;
+
+  for (user of database.users) {
+    if (user.id === id) {
+      res.json(user);
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    res.json("User not found")
   }
 })
