@@ -1,5 +1,5 @@
-const array = [1,2,3,4,5];
+const bcrypt = require('bcrypt-nodejs');
+let hash = bcrypt.hashSync("bacon");
 
-array.forEach(num => {
-    console.log(num + 1);
-})
+console.log(bcrypt.compareSync("bacon", hash)); // true
+console.log(bcrypt.compareSync("veggies", hash)); // false

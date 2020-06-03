@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const port = 3001;
+const bcrypt = require('bcrypt-nodejs');
 
 app.listen(port, () => {
     console.log(`app is running on port: ${port}.`)
@@ -15,7 +16,6 @@ const database = {
       id: '123',
       name: 'John',
       email: 'john@gmail.com',
-      password: 'john',
       entries: 0,
       joined: new Date()
     },
@@ -24,7 +24,6 @@ const database = {
       id: '124',
       name: 'Mary',
       email: 'mary@gmail.com',
-      password: 'mary',
       entries: 0,
       joined: new Date()
     },
@@ -33,7 +32,6 @@ const database = {
       id: '125',
       name: 'steve',
       email: 'steve@gmail.com',
-      password: 'steve',
       entries: 0,
       joined: new Date()
     },
@@ -42,9 +40,16 @@ const database = {
       id: '126',
       name: 'joe',
       email: 'joe@gmail.com',
-      password: 'joe',
       entries: 0,
       joined: new Date()
+    }
+  ],
+
+  logins: [
+    {
+      id: '123',
+      hash: '',
+      email: 'hello@gmail.com'
     }
   ]
 }
@@ -55,10 +60,12 @@ app.get('/', (req,res) => {
 
 app.post('/signin', (req, res) => {
   const { email, password } = req.body;
-
+  
   let found = false;
-  for (let user of database.users) {
-    if (user.email === email && user.password === password) {
+  for (let login of database.logins) {
+    const correctPassword = bcrypt.compareSync(password, login.hash);
+
+    if (user.email === email && correctPassword) {
       res.json("success");
       found = true;
       break;
@@ -66,24 +73,33 @@ app.post('/signin', (req, res) => {
   }  
 
   if (!found) {
-    res.json("fail")
+    res.status(400). json("fail")
   }
 })
 
 app.post('/register', (req,res) => {
   const { name, email, password } = req.body;
+  let passwordHash = bcrypt.hashSync(password);
 
   const newUser = {
-    id: '125',
-    name: name,
+      id: '123',
+      name: name,
+      email: email,
+      entries: 0,
+      joined: new Date()
+  }
+
+  const newLogin = {
+    id: '123',
     email: email,
-    password: password,
-    entries: 0,
-    joined: new Date()
+    hash: passwordHash
   }
 
   database.users.push(newUser);
+  database.logins.push(newLogin);
 
+  //console.log(database.logins[database.logins.length-1].hash);
+  //console.log(database.logins[database.logins.length-1])
   res.json(database.users[database.users.length-1])
 })
 
@@ -100,6 +116,23 @@ app.get('/profile/:id', (req, res) => {
   }
 
   if (!found) {
-    res.json("User not found")
+    res.status(400).json("User not found")
+  }
+})
+
+app.put('/image', (req, res) => {
+  const { id } = req.body;
+  let found = false;
+
+  for (let user of database.users) {
+    if (user.id === id) {
+      found = true;
+      user.entries += 1;
+      res.json(user.entries);
+      break;
+    }
+  }
+  if (!found) {
+    res.status(400).json("Incorrect ID");
   }
 })
