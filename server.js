@@ -54,54 +54,54 @@ const database = {
   ]
 }
 
-app.get('/', (req,res) => {
-  res.json(database.users);
+app.get('/', (request,response) => {
+  response.json(database.users);
 })
 
-app.post('/signin', (req, res) => {
-  const { email, password } = req.body;
+app.post('/signin', (request, response) => {
+  const { email, password } = request.body;
+  let hash;
   
-  let found = false;
   for (let login of database.logins) {
-    const correctPassword = bcrypt.compareSync(password, login.hash);
-
-    if (user.email === email && correctPassword) {
-      res.json("success");
-      found = true;
-      break;
+    if (login.email === email) {
+      //console.log(login.email)
+      hash = login.hash;
     }
-  }  
-
-  if (!found) {
-    res.status(400). json("fail")
   }
+
+  //console.log("Hash Brown: " + hash)
+  bcrypt.compare(password, hash, function(err, res) {
+    response.json(res);
+  });
+  
+
 })
 
 app.post('/register', (req,res) => {
   const { name, email, password } = req.body;
-  let passwordHash = bcrypt.hashSync(password);
 
-  const newUser = {
+  bcrypt.hash("bacon", null, null, function(err, hash) {
+    const newLogin = {
       id: '123',
-      name: name,
       email: email,
-      entries: 0,
-      joined: new Date()
-  }
+      hash: hash
+    }
 
-  const newLogin = {
-    id: '123',
-    email: email,
-    hash: passwordHash
-  }
+    const newUser = {
+        id: '123',
+        name: name,
+        email: email,
+        entries: 0,
+        joined: new Date()
+    }
 
-  database.users.push(newUser);
-  database.logins.push(newLogin);
+    database.users.push(newUser);
+    database.logins.push(newLogin);
 
-  //console.log(database.logins[database.logins.length-1].hash);
-  //console.log(database.logins[database.logins.length-1])
-  res.json(database.users[database.users.length-1])
-})
+    res.json(database.logins[database.logins.length-1]);
+    //res.json(database.users[database.users.length-1])
+  });
+});
 
 app.get('/profile/:id', (req, res) => {
   const { id } = req.params;
