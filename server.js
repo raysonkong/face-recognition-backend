@@ -61,17 +61,27 @@ app.get('/', (request,response) => {
 app.post('/signin', (request, response) => {
   const { email, password } = request.body;
   let hash;
-  
+  let found = false;
+
   for (let login of database.logins) {
     if (login.email === email) {
-      //console.log(login.email)
+      found = true;
       hash = login.hash;
     }
   }
 
+  if (!found) {
+    response.json("no such user")
+  }
   //console.log("Hash Brown: " + hash)
   bcrypt.compare(password, hash, function(err, res) {
-    response.json(res);
+    if (res) {
+      response.json("success");
+    }
+
+    else {
+      response.json("wrong password")
+    }
   });
   
 
@@ -98,8 +108,9 @@ app.post('/register', (req,res) => {
     database.users.push(newUser);
     database.logins.push(newLogin);
 
-    res.json(database.logins[database.logins.length-1]);
-    //res.json(database.users[database.users.length-1])
+    console.log("Hash bronw:  " + hash)
+    //res.json(database.logins[database.logins.length-1]);
+    res.json(database.users[database.users.length-1])
   });
 });
 
